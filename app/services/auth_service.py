@@ -8,7 +8,8 @@ from app.utils.jwt import create_access_token, create_refresh_token
 
 
 def assign_default_role(db: Session, user):
-    role = db.query(Role).filter(Role.name == INSTITUTE_ADMIN).first()
+
+    role = db.query(Role).filter(Role.name == "INSTITUTE_ADMIN").first()
 
     user_role = UserRole(
         user_id=user.id,
