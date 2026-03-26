@@ -1,16 +1,15 @@
 from fastapi import FastAPI
-from fastapi.middleware.cors import CORSMiddleware
+from sqlalchemy import text
+from app.core.database import engine
 
-app = FastAPI(title="Growcad API")
+app = FastAPI()
 
-app.add_middleware(
-    CORSMiddleware,
-    allow_origins=["*"],
-    allow_credentials=True,
-    allow_methods=["*"],
-    allow_headers=["*"],
-)
 
-@app.get("/")
-def root():
-    return {"message": "Growcad API running 🚀"}
+@app.get("/db-test")
+def test_db():
+    try:
+        with engine.connect() as conn:
+            conn.execute(text("SELECT 1"))
+        return {"db": "connected"}
+    except Exception as e:
+        return {"error": str(e)}
