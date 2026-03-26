@@ -4,6 +4,9 @@ from app.core.database import engine
 
 app = FastAPI()
 
+@app.get("/")
+def root():
+    return {"status": "running"}
 
 @app.get("/db-test")
 def test_db():
