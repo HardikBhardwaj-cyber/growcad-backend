@@ -25,6 +25,7 @@ def generate_otp(identifier: str):
         "expiry": expiry
     }
 
+    print("OTP:", otp)
     return otp
 
 
