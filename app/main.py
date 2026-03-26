@@ -6,9 +6,12 @@ from app.api.student import router as student_router
 from app.api.batch import router as batch_router
 from app.db.base import Base
 from app.db.session import engine
+from app.db.init_db import init_db
+
+
 
 # 🔥 CREATE TABLES (TEMP FOR NOW)
-Base.metadata.create_all(bind=engine)
+init_db()
 
 app = FastAPI()
 
