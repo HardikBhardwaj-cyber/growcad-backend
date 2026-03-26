@@ -7,6 +7,9 @@ from app.api.batch import router as batch_router
 from app.db.base import Base
 from app.db.session import engine
 from app.db.init_db import init_db
+from app.api.attendance import router as attendance_router
+
+
 
 
 
@@ -21,7 +24,7 @@ app.include_router(auth_router)
 app.include_router(test_router)
 app.include_router(student_router)
 app.include_router(batch_router)
-
+app.include_router(attendance_router)
 
 @app.get("/")
 def root():
