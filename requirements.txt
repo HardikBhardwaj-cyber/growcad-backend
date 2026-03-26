@@ -7,3 +7,7 @@ alembic
 passlib[bcrypt]
 python-jose
 requests
+fastapi
+uvicorn
+boto3
+python-multipart
