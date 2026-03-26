@@ -1,0 +1,6 @@
+SUPER_ADMIN = "super_admin"
+INSTITUTE_ADMIN = "institute_admin"
+FACULTY = "faculty"
+STUDENT = "student"
+PARENT = "parent"
+STAFF = "staff"

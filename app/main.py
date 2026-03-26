@@ -1,24 +1,23 @@
 from fastapi import FastAPI
-from sqlalchemy import text
-from app.core.database import engine
+from app.middleware.tenant import TenantMiddleware
+from app.api.auth import router as auth_router
+from app.api.test_secure import router as test_router
 
-# ✅ IMPORT THIS
-from app.api.upload import router as upload_router
+from app.api.student import router as student_router
+from app.api.batch import router as batch_router
+
+
 
 app = FastAPI()
 
-# ✅ ADD THIS
-app.include_router(upload_router, prefix="/api")
+app.add_middleware(TenantMiddleware)
+
+app.include_router(auth_router)
+app.include_router(test_router)
+app.include_router(student_router)
+app.include_router(batch_router)
+
 
 @app.get("/")
 def root():
-    return {"status": "running"}
-
-@app.get("/db-test")
-def test_db():
-    try:
-        with engine.connect() as conn:
-            conn.execute(text("SELECT 1"))
-        return {"db": "connected"}
-    except Exception as e:
-        return {"error": str(e)}
+    return {"message": "Growcad API running"}
