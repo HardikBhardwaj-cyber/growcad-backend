@@ -41,6 +41,7 @@ def get_current_user(
     if user.tenant_id != tenant.id:
         raise HTTPException(status_code=403, detail="Tenant mismatch")
 
+    print("USER ROLE:", user.role)
     return user
 
 
