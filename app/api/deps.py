@@ -4,13 +4,12 @@ from fastapi.security import HTTPBearer, HTTPAuthorizationCredentials
 
 from app.db.session import SessionLocal
 from app.models.user import User
-from app.models.user_role import UserRole
-from app.models.role import Role
 from app.utils.jwt import decode_token
 
 security = HTTPBearer()
 
 
+# DB session
 def get_db():
     db = SessionLocal()
     try:
@@ -19,12 +18,14 @@ def get_db():
         db.close()
 
 
+# Tenant
 def get_current_tenant(request: Request):
-    if not request.state.tenant:
+    if not hasattr(request.state, "tenant") or not request.state.tenant:
         raise HTTPException(status_code=400, detail="Invalid tenant")
     return request.state.tenant
 
 
+# 🔥 Current user
 def get_current_user(
     credentials: HTTPAuthorizationCredentials = Depends(security),
     db: Session = Depends(get_db),
@@ -41,23 +42,21 @@ def get_current_user(
     if user.tenant_id != tenant.id:
         raise HTTPException(status_code=403, detail="Tenant mismatch")
 
-    print("USER ROLE:", user.role)
+    # 🔥 attach role from JWT
+    user.role = payload.get("role")
+
     return user
 
 
-def require_role(required_role: str):
-    def role_checker(
-        user=Depends(get_current_user),
-        db: Session = Depends(get_db)
-    ):
-        role = (
-            db.query(Role.name)
-            .join(UserRole, Role.id == UserRole.role_id)
-            .filter(UserRole.user_id == user.id)
-            .first()
-        )
+# 🔥 Role guard (FINAL)
+def require_role(allowed_roles: list):
+    def role_checker(user=Depends(get_current_user)):
 
-        if not role or role[0] != required_role:
+        # super admin override
+        if user.role == "super_admin":
+            return user
+
+        if user.role not in allowed_roles:
             raise HTTPException(status_code=403, detail="Access denied")
 
         return user

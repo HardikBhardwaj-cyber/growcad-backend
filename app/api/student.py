@@ -3,25 +3,43 @@ from sqlalchemy.orm import Session
 
 from app.api.deps import get_db, get_current_tenant, require_role
 from app.constants.roles import INSTITUTE_ADMIN
-from app.crud.student import create_student, get_students
+
+# 🔥 USE SERVICE (NOT CRUD)
+from app.services.student_service import (
+    create_student,
+    list_students
+)
 
 router = APIRouter(prefix="/students", tags=["Students"])
 
 
+# =========================
+# ➕ ADD STUDENT
+# =========================
 @router.post("/")
 def add_student(
     data: dict,
     db: Session = Depends(get_db),
     tenant=Depends(get_current_tenant),
-    user=Depends(require_role(INSTITUTE_ADMIN))
+    user=Depends(require_role([INSTITUTE_ADMIN]))
 ):
-    return create_student(db, data, tenant.id)
+    student = create_student(
+        db=db,
+        tenant_id=tenant.id,
+        name=data.get("name"),
+        phone=data.get("phone")
+    )
+
+    return student
 
 
+# =========================
+# 📋 LIST STUDENTS
+# =========================
 @router.get("/")
-def list_students(
+def list_students_api(
     db: Session = Depends(get_db),
     tenant=Depends(get_current_tenant),
-    user=Depends(require_role(INSTITUTE_ADMIN))
+    user=Depends(require_role([INSTITUTE_ADMIN]))
 ):
-    return get_students(db, tenant.id)
+    return list_students(db, tenant.id)
