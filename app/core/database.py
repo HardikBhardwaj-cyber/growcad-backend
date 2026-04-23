@@ -1,10 +1,4 @@
-from sqlalchemy import create_engine
-from sqlalchemy.orm import sessionmaker
-import os
+# app/core/database.py
 
-DATABASE_URL = os.getenv("DATABASE_URL")
-
-if not DATABASE_URL:
-    raise Exception("DATABASE_URL not set")
-
-engine = create_engine(DATABASE_URL)
+# ❌ DO NOT create engine here
+# This file should not manage DB anymore
