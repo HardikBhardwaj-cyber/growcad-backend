@@ -34,7 +34,63 @@ from app.constants.slabs import SLABS
 
 router = APIRouter(prefix="/auth", tags=["Auth"])
 
+@router.post("/signup")
+def signup(payload: dict, db: Session = Depends(get_db)):
+    """
+    Simple signup:
+    - create tenant
+    - create user
+    - send OTP
+    """
 
+    name = payload.get("name")
+    email = payload.get("email")
+    phone = payload.get("phone")
+    institute = payload.get("institute")
+
+    if not phone or not institute:
+        raise HTTPException(status_code=400, detail="Missing required fields")
+
+    # ❗ check existing user
+    existing_user = get_user_by_identifier(db, phone)
+    if existing_user:
+        raise HTTPException(status_code=400, detail="User already exists")
+
+    # 🔥 CREATE TENANT
+    tenant = Tenant(
+        id=str(uuid.uuid4()),
+        name=institute,
+        subdomain=f"{institute.lower().replace(' ', '')}",
+        slab_name="starter",
+        slab_limit=SLABS["starter"],
+        plan="free"
+    )
+
+    db.add(tenant)
+    db.commit()
+
+    # 🔥 CREATE USER
+    user = create_user(db, phone, tenant.id)
+
+    assign_default_role(db, user)
+
+    # 🔥 SEND OTP
+    generate_otp(phone)
+
+    return {
+    "success": True,
+    "data": {
+        "userId": user.id,
+        "tenantId": tenant.id,
+        "token": create_access_token({
+            "user_id": user.id,
+            "tenant_id": tenant.id,
+            "role": "admin"
+        }),
+        "phone": phone,
+        "otpSent": True
+    }
+}
 # =========================
 # 📲 SEND OTP
 # =========================
